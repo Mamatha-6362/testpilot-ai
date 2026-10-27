@@ -1,0 +1,21 @@
+services:
+  testpilot-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testpilot-ai-app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - PYTEST_TIMEOUT_SECONDS=30
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - testpilot_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  testpilot_data:
+    driver: local
