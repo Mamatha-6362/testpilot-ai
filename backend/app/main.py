@@ -839,16 +839,24 @@ def export_test_report(project_id: str, export_format: str):
 
 # --- Frontend Static Files Serving ---
 FRONTEND_DIST = ROOT_DIR / "frontend" / "dist"
-if FRONTEND_DIST.exists():
-    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+ASSETS_DIR = FRONTEND_DIST / "assets"
 
-    @app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
-        file_path = FRONTEND_DIST / full_path
-        if file_path.is_file():
-            return FileResponse(file_path)
-        index_file = FRONTEND_DIST / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
-        return PlainTextResponse("TestPilot AI Frontend Dist not built yet. Run 'npm run build' in frontend.", status_code=404)
+if ASSETS_DIR.exists() and ASSETS_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    # Never shadow API routes
+    if full_path.startswith("api/") or full_path == "api":
+        raise HTTPException(status_code=404, detail="API route not found")
+    
+    file_path = FRONTEND_DIST / full_path
+    if FRONTEND_DIST.exists() and file_path.is_file():
+        return FileResponse(file_path)
+    
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    
+    return PlainTextResponse("TestPilot AI is initializing...", status_code=200)
 

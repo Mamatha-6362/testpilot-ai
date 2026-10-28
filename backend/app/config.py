@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
@@ -14,10 +13,10 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
 BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
 
-class Settings(BaseSettings):
+class Settings:
     app_name: str = "TestPilot AI"
-    host: str = "127.0.0.1"
-    port: int = 8000
+    host: str = os.getenv("HOST", "0.0.0.0")
+    port: int = int(os.getenv("PORT", "8000"))
     database_url: str = f"sqlite:///{DATABASE_PATH.as_posix()}"
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
